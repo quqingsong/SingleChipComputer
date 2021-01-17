@@ -1,0 +1,120 @@
+C51 COMPILER V9.60.0.0   DS18B20                                                           08/13/2020 15:58:57 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Objects\ds18b20.obj
+COMPILER INVOKED BY: D:\Develop\KeilC51\C51\BIN\C51.EXE USER\ds18b20.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT
+                    -(.\Listings\ds18b20.lst) TABS(2) OBJECT(.\Objects\ds18b20.obj)
+
+line level    source
+
+   1          #include "config.h"
+   2          #include "ds18b20.h"
+   3          #include "delay.h"
+   4          
+   5          /*单总线初始化时序*/
+   6          bit ds_init()
+   7          {
+   8   1        bit i;
+   9   1        DS = 1;
+  10   1        _nop_();
+  11   1        DS = 0;
+  12   1        delay_us(75); //拉低总线499.45us 挂接在总线上的18B20将会全部被复位
+  13   1        DS = 1; //释放总线
+  14   1        delay_us(4); //延时37.95us 等待18B20发回存在信号
+  15   1        i = DS;
+  16   1        delay_us(20); //141.95us
+  17   1        DS = 1;
+  18   1        _nop_();
+  19   1        return (i);
+  20   1      }
+  21          
+  22          /*写一个字节*/
+  23          void write_byte(uchar dat)
+  24          {
+  25   1        uchar i;
+  26   1        for(i=0;i<8;i++)
+  27   1        {
+  28   2          DS = 0;
+  29   2          _nop_();//产生些时序
+  30   2          DS = dat & 0x01;
+  31   2          delay_us(10);//76.95us
+  32   2          DS = 1; //释放总线准备下一次数据写入
+  33   2          _nop_();
+  34   2          dat >>= 1;
+  35   2        }
+  36   1      }
+  37          
+  38          uchar read_byte()
+  39          {
+  40   1        uchar i, j, dat;
+  41   1        for(i=0;i<8;i++)
+  42   1        {
+  43   2          DS = 0;
+  44   2          _nop_();//产生读时序
+  45   2          DS = 1;
+  46   2          _nop_();//释放总线
+  47   2          j = DS;
+  48   2          delay_us(10);//76.95us
+  49   2          DS = 1;
+  50   2          _nop_();
+  51   2          dat = (j<<7)|(dat>>1);  
+  52   2        }
+  53   1        return (dat);
+  54   1      }
+C51 COMPILER V9.60.0.0   DS18B20                                                           08/13/2020 15:58:57 PAGE 2   
+
+  55          void dsStart()
+  56          {
+  57   1        ds_init();//初始化DS18B20
+  58   1        write_byte(0xcc);//发送跳跃ROM指令
+  59   1        write_byte(0x4e);//写暂存器指令
+  60   1        write_byte(0x7f);//TH用户字节
+  61   1        write_byte(0xf7);//TL用户字节
+  62   1        write_byte(0x7f);//配置工作在12位模式下
+  63   1        ds_init();//初始化DS18B20
+  64   1        write_byte(0xcc);//发送跳跃ROM指令 
+  65   1        write_byte(0x48);//拷贝暂存器到温度传感器的EEPROM中
+  66   1      }
+  67          
+  68          float getTemperature()
+  69          {
+  70   1        float temperature;
+  71   1        uint i;
+  72   1        uchar L, M;
+  73   1        ds_init();//初始化DS18B20
+  74   1        write_byte(0xcc);//发送跳跃ROM指令
+  75   1        write_byte(0x44);//发送温度转换指令
+  76   1        ds_init();//初始化DS18B20
+  77   1        write_byte(0xcc);//发送跳跃ROM指令
+  78   1        write_byte(0xbe);//读取DS18B20暂存器值
+  79   1        L = read_byte();
+  80   1        M = read_byte();
+  81   1        //模拟显示-55度，实际测温需注解掉下面这两句
+  82   1        //M = 0xfe;
+  83   1        //L = 0x6f;
+  84   1      
+  85   1        i = M;
+  86   1        i <<= 8;
+  87   1        i |= L;   
+  88   1        if(M >= 0x08) //判断是否为负数
+  89   1        { 
+  90   2          i = ~i + 1;//负数是以补码的形式存放的需要我们需要取反加1
+  91   2        }
+  92   1        temperature = i * 0.0625; //浮点型数据转换
+  93   1        return temperature;
+  94   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    255    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

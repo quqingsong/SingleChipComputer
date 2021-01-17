@@ -1,0 +1,7 @@
+".\Objects\main.obj",
+".\Objects\esp8266.obj",
+".\Objects\uart.obj",
+".\Objects\ds18b20.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\ESP8266-1" 
+PRINT(".\Listings\ESP8266-1.m51") RAMSIZE(256) 

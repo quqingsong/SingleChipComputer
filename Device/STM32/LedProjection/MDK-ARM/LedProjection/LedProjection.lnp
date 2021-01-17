@@ -1,0 +1,25 @@
+--cpu Cortex-M3
+"ledprojection\startup_stm32f103xb.o"
+"ledprojection\main.o"
+"ledprojection\gpio.o"
+"ledprojection\sys.o"
+"ledprojection\stm32f1xx_it.o"
+"ledprojection\stm32f1xx_hal_msp.o"
+"ledprojection\stm32f1xx_hal_gpio_ex.o"
+"ledprojection\stm32f1xx_hal_tim.o"
+"ledprojection\stm32f1xx_hal_tim_ex.o"
+"ledprojection\stm32f1xx_hal.o"
+"ledprojection\stm32f1xx_hal_rcc.o"
+"ledprojection\stm32f1xx_hal_rcc_ex.o"
+"ledprojection\stm32f1xx_hal_gpio.o"
+"ledprojection\stm32f1xx_hal_dma.o"
+"ledprojection\stm32f1xx_hal_cortex.o"
+"ledprojection\stm32f1xx_hal_pwr.o"
+"ledprojection\stm32f1xx_hal_flash.o"
+"ledprojection\stm32f1xx_hal_flash_ex.o"
+"ledprojection\stm32f1xx_hal_exti.o"
+"ledprojection\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "LedProjection\LedProjection.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "LedProjection.map" -o LedProjection\LedProjection.axf

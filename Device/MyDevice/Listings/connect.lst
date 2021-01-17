@@ -1,0 +1,98 @@
+C51 COMPILER V9.54   CONNECT                                                               01/05/2021 00:00:58 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE CONNECT
+OBJECT MODULE PLACED IN .\Objects\connect.obj
+COMPILER INVOKED BY: D:\MySoftWareInstall\Keil_v5\C51\BIN\C51.EXE ATUsing\connect.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJEC
+                    -TEXTEND PRINT(.\Listings\connect.lst) TABS(2) OBJECT(.\Objects\connect.obj)
+
+line level    source
+
+   1          #include<reg52.h>       //51单片机常用的头文件
+   2          #define uchar unsigned char   //宏定义一个无符号的char类型
+   3          #define uint unsigned int   //宏定义一个无符号的int类型
+   4          
+   5          //发送一字节
+   6          void sendByte(uchar b)
+   7          {
+   8   1        SBUF = b;
+   9   1        while(!TI);
+  10   1        TI=0;
+  11   1      }
+  12          
+  13          //发送字符串
+  14          void sendString(uchar *s)
+  15          {
+  16   1        while(*s != '\0') //字符串默认结尾'\0'，以此来判断字符串的结束
+  17   1        {
+  18   2          sendByte(*s);
+  19   2          s++;
+  20   2        }
+  21   1      }
+  22          
+  23          //初始化ESP8266WiFi模块
+  24          void initEsp()
+  25          {
+  26   1        uint a;
+  27   1        SCON = 0x50;    //8位数据，可变波特率
+  28   1        TMOD = 0x20;    //设置定时器1位16位自动重装模式
+  29   1        TL1 = 0xfd;     //设置定时器初值，波特率为9600
+  30   1        TH1 = 0xfd;
+  31   1        ET1 = 0;        //禁止定时器1中断
+  32   1        TR1 = 1;        //启动定时器1
+  33   1        EA = 1;
+  34   1      
+  35   1        for (a=0; a<50000; a++);    //延时几秒，让模块有时间启动
+  36   1        sendString("AT+CWMODE=1\n");  //设置为softAP和station共存模式
+  37   1      
+  38   1        //WiFi热点不能通过代码设置，可使用串口助手进行设置，该设置断电不丢失
+  39   1        /*
+  40   1        for (a=0; a<20000; a++);
+  41   1        sendString("AT+CWSAP='TEST','12345678',1,3\n"); //建立WiFi热点
+  42   1        */
+  43   1      
+  44   1        for (a=0; a<50000; a++);    
+  45   1        sendString("AT+CIPMUX=1\n"); //启动多连接
+  46   1      
+  47   1        for (a=0; a<20000; a++);
+  48   1        sendString("AT+CWJAP=\"qingsong\",\"11111111\"\r\n"); 
+  49   1        
+  50   1        for (a=0; a<20000; a++);
+  51   1        sendString("AT+CIPSTART=\"TCP\",\"192.168.43.10\",8080\r\n"); //服务器的设置端口
+  52   1      
+  53   1        for (a=0; a<20000; a++);
+  54   1        sendString("AT+CIPSTO=50\n");     //服务器超时时间设置
+C51 COMPILER V9.54   CONNECT                                                               01/05/2021 00:00:58 PAGE 2   
+
+  55   1      
+  56   1        for (a=0; a<20000; a++);
+  57   1        sendString("AT+CIPSEND\r\n"); //进入透传模式
+  58   1        for (a=0; a<20000; a++);
+  59   1        sendString("OK"); //发送OK
+  60   1        for (a=0; a<20000; a++);
+  61   1        sendString("qingsong\r\n"); //服务器的设置端口数据
+  62   1       
+  63   1        
+  64   1        RI=0;
+  65   1        ES=1;   //初始化完成，串行口中断打开
+  66   1      }
+  67          
+  68          //主函数  
+  69          void  main()  
+  70          {  
+  71   1        initEsp();
+  72   1      }      
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    273    ----
+   CONSTANT SIZE    =    141    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

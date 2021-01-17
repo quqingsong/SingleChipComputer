@@ -1,0 +1,77 @@
+C51 COMPILER V9.54   SERIAL                                                                01/03/2021 20:07:49 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE SERIAL
+OBJECT MODULE PLACED IN .\Objects\Serial.obj
+COMPILER INVOKED BY: D:\MySoftWareInstall\Keil_v5\C51\BIN\C51.EXE Interrupt\Serial.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJE
+                    -CTEXTEND PRINT(.\Listings\Serial.lst) TABS(2) OBJECT(.\Objects\Serial.obj)
+
+line level    source
+
+   1          #include"reg52.h"
+   2          
+   3          
+   4          typedef unsigned char u8;
+   5          typedef unsigned int u16;
+   6          
+   7          sbit led=P1^0;
+   8          sbit led2=P2^0;
+   9          
+  10          //中断初始化函数
+  11          void init(){
+  12   1        //IE寄存器，EA为总中断，ES为串口中断。
+  13   1        EA=1;
+  14   1        ES=1;
+  15   1        
+  16   1        //工作方式寄存器
+  17   1        TMOD=0x20;              //采用方式二 8位自动重装定时器/计数器
+  18   1        //计算T0的初值,9600
+  19   1        TH1=0xF9;
+  20   1        TL1=0xF9;
+  21   1        //与串行口相关
+  22   1        PCON=0x80;
+  23   1        //打开定时器
+  24   1        TR1=1;
+  25   1        //SCON串行口控制寄存器
+  26   1        SCON=0x50;
+  27   1      }
+  28          
+  29          //主函数
+  30          void main(){
+  31   1        init();
+  32   1        while(1);
+  33   1        
+  34   1      }
+  35          
+  36          void USAR() interrupt 4{
+  37   1        //SBUF是输出缓冲器，会产生溢出。 
+  38   1        u8 receiveData=SBUF;
+  39   1        
+  40   1        led=receiveData;
+  41   1        led2=receiveData;
+  42   1        //软件清零
+  43   1        RI=0;
+  44   1        //将接收到的数据放入到发送寄存器
+  45   1        SBUF=receiveData;
+  46   1        //等待发送数据完成
+  47   1        while(!TI);
+  48   1        //清除发送完成标志位
+  49   1        TI=0;
+  50   1        
+  51   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.54   SERIAL                                                                01/03/2021 20:07:49 PAGE 2   
+
+   CODE SIZE        =     61    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

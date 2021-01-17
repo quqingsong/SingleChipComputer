@@ -1,0 +1,119 @@
+C51 COMPILER V9.54   COMMUNICATION                                                         01/03/2021 22:28:41 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE COMMUNICATION
+OBJECT MODULE PLACED IN .\Objects\communication.obj
+COMPILER INVOKED BY: D:\MySoftWareInstall\Keil_v5\C51\BIN\C51.EXE Interrupt\communication.c OPTIMIZE(8,SPEED) BROWSE DEB
+                    -UG OBJECTEXTEND PRINT(.\Listings\communication.lst) TABS(2) OBJECT(.\Objects\communication.obj)
+
+line level    source
+
+   1           
+   2          #include<reg52.h>
+   3          
+   4          #include<stdio.h>
+   5           
+   6          #define uchar unsigned char
+   7           
+   8          #define uint  unsigned int
+   9          uchar buf;
+  10           
+  11          #define led P1
+  12          char n=10000;
+  13          void show();
+  14           
+  15          void main(void)
+  16           
+  17          {
+  18   1       
+  19   1      SCON=0x50;//设定串口工作方式0101 0000
+  20   1       
+  21   1      PCON=0x00;
+  22   1       
+  23   1      TMOD=0x20;
+  24   1       
+  25   1      EA=1;
+  26   1       
+  27   1      ES=1;
+  28   1       
+  29   1      TL1=0xfd;//波特率9600
+  30   1       
+  31   1      TH1=0xfd;
+  32   1       
+  33   1      TR1=1;
+  34   1       
+  35   1      while(1){
+  36   2        show();
+  37   2        while(n--);
+  38   2      }
+  39   1       
+  40   1      }
+  41           
+  42           
+  43           
+  44          //串行中断服务函数
+  45           
+  46          void serial() interrupt 4
+  47           
+  48            {
+  49   1       
+  50   1        ES=0;   //暂时关闭串口中断
+  51   1       
+  52   1        RI=0;
+  53   1       
+  54   1        buf=SBUF; //把收到的信息从SBUF放到buf中。
+C51 COMPILER V9.54   COMMUNICATION                                                         01/03/2021 22:28:41 PAGE 2   
+
+  55   1       
+  56   1        switch(buf)
+  57   1       
+  58   1        {
+  59   2       
+  60   2        case 0x31: led=0xfe;break;   //二进制 0011 0001  十进制 49 控制字符 1  16进制 0X31
+  61   2       
+  62   2        case 0x32: led=0xfd;break;   //1111 1101
+  63   2       
+  64   2        case 0x33: led=0xfb;break;
+  65   2       
+  66   2        case 0x34: led=0xf7;break;
+  67   2       
+  68   2        case 0x35: led=0xef;break;   
+  69   2       
+  70   2        case 0x36: led=0xdf;break;  
+  71   2       
+  72   2        case 0x37: led=0xbf;break;
+  73   2       
+  74   2        case 0x38: led=0x7f;break;
+  75   2       
+  76   2        }
+  77   1       
+  78   1        ES=1;   //重新开启串口中断
+  79   1       
+  80   1        SBUF=buf;
+  81   1        while(!TI);
+  82   1        TI=0;
+  83   1       
+  84   1      }
+  85            
+  86          void show(){
+  87   1        ES=1;   //重新开启串口中断
+  88   1        SBUF=led;
+  89   1        while(!TI);
+  90   1        TI=0;
+  91   1      }
+  92           
+  93           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    167    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

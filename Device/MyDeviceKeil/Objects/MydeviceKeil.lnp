@@ -1,0 +1,3 @@
+".\Objects\Device.obj" 
+TO ".\Objects\MydeviceKeil" 
+PRINT(".\Listings\MydeviceKeil.m51")

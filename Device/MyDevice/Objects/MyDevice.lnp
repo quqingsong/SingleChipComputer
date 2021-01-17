@@ -1,0 +1,3 @@
+".\Objects\MyAT.obj" 
+TO ".\Objects\MyDevice" 
+PRINT(".\Listings\MyDevice.m51") RAMSIZE(256) 

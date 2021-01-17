@@ -1,0 +1,122 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              08/13/2020 15:58:57 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Develop\KeilC51\C51\BIN\C51.EXE USER\main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\
+                    -Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "config.h"
+   2          #include "uart.h"
+   3          #include "esp8266.h"
+   4          #include "ds18b20.h"
+   5          #include "delay.h"
+   6          
+   7          unsigned char mSec;
+   8          uchar dat[10],cnt = 0,flag = 0;
+   9          
+  10          //数码管显示手机发送过来的数据 手机连接的是ESP8266的wifi 
+  11          sbit du = P2^6;
+  12          sbit wei = P2^7;
+  13                                    //"0" //"1"  //"2"  //"3"  //"4"  //"5"  //"6"  //"7"
+  14          unsigned code leds[8] = {0x7F,  0xBF,  0xDF,  0xEF,  0xF7,  0xFB,  0xFD,  0xFE};
+  15                                      //"0"  //"1" //"2" //"3" //"4" //"5" //"6" //"7" //"8" //"9" //"A" //"B" //"C" //"D" //"E" /
+             -/"F" //"H" //"L" //"-" //熄灭
+  16          unsigned code numbers[20] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x77, 0x7C, 0x39,
+             - 0x5E, 0x79, 0x71, 0x76, 0x38, 0x40, 0x00};
+  17          
+  18          //串口中断函数
+  19          void interruptUart() interrupt 4 {
+  20   1        if(RI == 1) {//接受完成标志
+  21   2          RI = 0;//要软件清0
+  22   2          dat[cnt] = SBUF;//将数据赋给num SBUF位内部寄存器 num = SBUF表示接受SBUF = num表示发送 
+  23   2          if(dat[0]=='+')
+  24   2            cnt++;
+  25   2          else
+  26   2            cnt=0;
+  27   2          if(cnt==10)
+  28   2          {
+  29   3            cnt=0;
+  30   3            flag = dat[9]-0x30;
+  31   3          }
+  32   2        }
+  33   1      }
+  34          //定时器0中断函数
+  35          void timer0() interrupt 1 {
+  36   1          //从新给初值
+  37   1          TH0 = (65535- 46082) / 256;//高八位
+  38   1          TL0 = (65535- 46082) % 256;//低八位
+  39   1          mSec ++;
+  40   1          if (mSec == 200) {//10s时间到
+  41   2            mSec = 0;
+  42   2            if (canSendSatus()) 
+  43   2            {
+  44   3              //P1 = ~P1;
+  45   3              sendJavaSocket(getTemperature());//发送数据到java上位机
+  46   3            }
+  47   2          }
+  48   1      }
+  49          
+  50          void main() {
+  51   1        dsStart();
+  52   1        initUart();
+C51 COMPILER V9.60.0.0   MAIN                                                              08/13/2020 15:58:57 PAGE 2   
+
+  53   1        esp8266_init(3);
+  54   1        timer0Init();//定时器0初始化
+  55   1        while(1) {
+  56   2          
+  57   2          if((flag>=0)&&(flag<=9))
+  58   2          {
+  59   3            
+  60   3            du = 1;
+  61   3            P0 = numbers[flag];
+  62   3            du = 0;
+  63   3            wei = 1;
+  64   3            P0 = 0xFE;
+  65   3            wei = 0;
+  66   3            
+  67   3            switch(flag)
+  68   3            {
+  69   4              case 0: P1=leds[flag];
+  70   4              break;
+  71   4              case 1: P1=leds[flag];
+  72   4              break;
+  73   4              case 2: P1=leds[flag];
+  74   4              break;
+  75   4              case 3: P1=leds[flag];
+  76   4              break;
+  77   4              case 4: P1=leds[flag];
+  78   4              break;
+  79   4              case 5: P1=leds[flag];
+  80   4              break;
+  81   4              case 6: P1=leds[flag];
+  82   4              break;
+  83   4              case 7: P1=leds[flag];
+  84   4              break;
+  85   4              case 8: P1=leds[3];delay_ms(500);P1=leds[4];delay_ms(500);
+  86   4              break;
+  87   4              case 9: P1=leds[6];delay_ms(500);P1=leds[7];delay_ms(500);
+  88   4              break;
+  89   4              default:
+  90   4              break;
+  91   4            }
+  92   3           }
+  93   2        }
+  94   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    350    ----
+   CONSTANT SIZE    =     56    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

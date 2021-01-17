@@ -1,0 +1,106 @@
+C51 COMPILER V9.54   ATNET                                                                 01/04/2021 00:33:05 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE ATNET
+OBJECT MODULE PLACED IN .\Objects\ATNet.obj
+COMPILER INVOKED BY: D:\MySoftWareInstall\Keil_v5\C51\BIN\C51.EXE ATUsing\ATNet.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\ATNet.lst) TABS(2) OBJECT(.\Objects\ATNet.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<stdio.h>
+   3           
+   4          #define uchar unsigned char 
+   5          #define uint unsigned int
+   6           
+   7          void delayms(uint x)   //51单片机的常用延时方式
+   8          {
+   9   1        uint i,j;
+  10   1        for(i=x;i>0;i--)
+  11   1          for(j=110;j>0;j--);
+  12   1      }
+  13           
+  14          void uart_init()      //串口的初始化
+  15          {
+  16   1        TMOD = 0x20;
+  17   1        TH1 = 0XFd;
+  18   1        TL1 = 0XFd;
+  19   1        SCON = 0x50;
+  20   1        PCON = 0X00;
+  21   1        TR1 = 1;
+  22   1        EA = 1;
+  23   1        ES = 1;
+  24   1      } 
+  25           
+  26          void wifi_init()      //初始化wifi模块
+  27          {
+  28   1        ES = 0;       //关闭串口中断，以免发送指令过程中被其他事情打断
+  29   1        TI = 1;
+  30   1       
+  31   1        printf("AT+RST\r\n");  //往串口发重启指令，在单片机中使用printf默认是往串口发送�
+             -�据
+  32   1        delayms(1200);         //适当延时，给wifi模块一点反应时间
+  33   1       
+  34   1        printf("AT+CWMODE=1\r\n");  //选择STA模式
+  35   1        delayms(1200);
+  36   1       
+  37   1        printf("AT+CIPMUX=0\r\n");  //单通道模式
+  38   1        delayms(1200);
+  39   1        
+  40   1        printf("AT+CIPSTART=\"TCP\",\"192.168.43.10\",8080\r\n");  //设置远程主机IP和端口号
+  41   1        delayms(1200);
+  42   1       
+  43   1        printf("AT+CIPMODE=1\r\n");  //选择透传
+  44   1        delayms(1200);
+  45   1       
+  46   1        printf("AT+CIPSEND\r\n");  //发送数据命令
+  47   1        delayms(1200);
+  48   1       
+  49   1        while(!TI);
+  50   1        TI = 0;  
+  51   1        ES = 1;  //重新开启串口中断
+  52   1      }
+  53           
+C51 COMPILER V9.54   ATNET                                                                 01/04/2021 00:33:05 PAGE 2   
+
+  54          void send(char *p)  //发送数据函数
+  55          {
+  56   1        TI=0;
+  57   1        do
+  58   1        { 
+  59   2          SBUF = *p;
+  60   2          p++;
+  61   2          while(!TI);
+  62   2          TI = 0;
+  63   2        }while(*p);
+  64   1        SBUF = ' ';
+  65   1        while(!TI);
+  66   1        TI = 0;
+  67   1      }
+  68           
+  69           
+  70          void main()
+  71          {
+  72   1        uart_init();
+  73   1        wifi_init();
+  74   1        while(1)
+  75   1        {
+  76   2          send("qingsong\r\n");  //这里只简单发送几个字符串作为演示
+  77   2          delayms(1000);  //适当延时
+  78   2        }
+  79   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    197    ----
+   CONSTANT SIZE    =    117    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
